@@ -10,7 +10,6 @@ Future<Map<String, dynamic>> fetchAllIncomes(BuildContext context) async {
 
   try {
     final token = await storage.read(key: 'access_token');
-    // print(token);
 
     if (token == null) {
       return {'success': false, 'message': 'No token found'};
@@ -31,7 +30,6 @@ Future<Map<String, dynamic>> fetchAllIncomes(BuildContext context) async {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      // print(data);
       return {'success': true, 'data': data};
     } else {
       return {'success': false, 'message': 'Failed to fetch data'};
@@ -42,7 +40,7 @@ Future<Map<String, dynamic>> fetchAllIncomes(BuildContext context) async {
 }
 
 Future<Map<String, dynamic>> addIncome(BuildContext context, int amount,
-    String description, String category, DateTime dateReceived) async {
+    String description, String category, DateTime date) async {
   final token = await storage.read(key: 'access_token');
   final url = Uri.parse('http://10.0.2.2:8000/api/income/');
 
@@ -55,9 +53,8 @@ Future<Map<String, dynamic>> addIncome(BuildContext context, int amount,
       'amount': amount,
       'category': category,
       'description': description,
-      'date_received': dateReceived.toIso8601String(), // Include full date-time
+      'date_received': date.toIso8601String(),
     };
-    print("Request body: ${json.encode(requestBody)}");
 
     final response = await http.post(url,
         headers: {
@@ -85,13 +82,8 @@ Future<Map<String, dynamic>> addIncome(BuildContext context, int amount,
   }
 }
 
-Future<Map<String, dynamic>> editIncome(
-    BuildContext context,
-    int incomeId,
-    int amount,
-    String description,
-    String category,
-    DateTime? dateReceived) async {
+Future<Map<String, dynamic>> editIncome(BuildContext context, int incomeId,
+    int amount, String description, String category, DateTime? date) async {
   final token = await storage.read(key: 'access_token');
   final url = Uri.parse('http://10.0.2.2:8000/api/income/$incomeId/');
 
@@ -105,7 +97,7 @@ Future<Map<String, dynamic>> editIncome(
           'amount': amount,
           'description': description,
           'category': category,
-          'date_received': dateReceived?.toIso8601String(),
+          'date_received': date?.toIso8601String(),
         }));
 
     if (response.statusCode == 200) {

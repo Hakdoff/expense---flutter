@@ -2,14 +2,15 @@ class ExpenseModel {
   final int id;
   final int? amount;
   final String? category;
-  final DateTime? dateSpended;
+  final DateTime? date;
   final String? description;
+  final String type = 'Income';
 
   ExpenseModel(
       {required this.id,
       required this.amount,
       required this.category,
-      required this.dateSpended,
+      required this.date,
       required this.description});
 
   factory ExpenseModel.fromJson(Map<String, dynamic> json) {
@@ -17,7 +18,7 @@ class ExpenseModel {
         id: json['id'],
         amount: json['amount'],
         category: json['category'],
-        dateSpended: json['date_spended'] != null
+        date: json['date_spended'] != null
             ? DateTime.parse(json['date_spended'])
             : null,
         description: json['description']);
@@ -25,6 +26,6 @@ class ExpenseModel {
 
   @override
   String toString() {
-    return 'ExpenseMode(amount: $amount, category: $category, description: $description, dateReceived: $dateSpended)';
+    return 'ExpenseMode(amount: $amount, category: $category, description: $description, date: $date)';
   }
 }

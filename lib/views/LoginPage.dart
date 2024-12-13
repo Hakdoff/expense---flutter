@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_expense_tracker/main.dart';
 import 'package:flutter_expense_tracker/services/login_service.dart';
 import 'package:flutter_expense_tracker/views/home_page.dart';
 import 'package:flutter_expense_tracker/views/income/income_page.dart';
@@ -37,7 +38,7 @@ class _LoginPageState extends State<LoginPage> {
     if (result['success'] == true) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => HomePage()),
+        MaterialPageRoute(builder: (context) => const MyApp()),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

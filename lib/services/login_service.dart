@@ -19,7 +19,6 @@ Future<Map<String, dynamic>> loginUser(String email, String password) async {
 
       await storage.write(key: 'access_token', value: accessToken);
       await storage.write(key: 'refresh_token', value: refreshToken);
-      print(accessToken);
 
       final data = json.decode(response.body);
       final token = data['token'];

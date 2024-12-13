@@ -24,21 +24,14 @@ Future<Map<String, dynamic>> registerUser(
       }),
     );
 
-    print('Response status: ${response.statusCode}');
-    print('Response body: ${response.body}');
-
     if (response.statusCode == 201) {
-      // Most APIs return 201 for successful creation
-      print('User created successfully');
       return {'success': true, 'message': 'User registered successfully'};
     } else {
       // Parse error messages from backend
       final errorData = json.decode(response.body);
-      print('Registration failed: $errorData');
       return {'success': false, 'message': errorData.toString()};
     }
   } catch (e) {
-    print('Error during registration: $e');
     return {'success': false, 'message': 'Registration failed: $e'};
   }
 }

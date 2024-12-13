@@ -34,7 +34,7 @@ Future<Map<String, dynamic>> fetchExpenses(BuildContext context) async {
 }
 
 Future<Map<String, dynamic>> addExpenses(BuildContext context, int amount,
-    String category, String description, DateTime dateSpended) async {
+    String category, String description, DateTime date) async {
   final token = await storage.read(key: 'access_token');
   final url = Uri.parse('http://10.0.2.2:8000/api/expense/');
 
@@ -43,10 +43,8 @@ Future<Map<String, dynamic>> addExpenses(BuildContext context, int amount,
       'amount': amount,
       'category': category,
       'description': description,
-      'date_spended': dateSpended.toIso8601String()
+      'date_spended': date.toIso8601String()
     };
-
-    print("Request body: ${json.encode(requestBody)}");
 
     final response = await http.post(url,
         headers: {
@@ -74,13 +72,8 @@ Future<Map<String, dynamic>> addExpenses(BuildContext context, int amount,
   }
 }
 
-Future<Map<String, dynamic>> editExpense(
-    BuildContext context,
-    int id,
-    int amount,
-    String description,
-    String category,
-    DateTime? dateSpended) async {
+Future<Map<String, dynamic>> editExpense(BuildContext context, int id,
+    int amount, String description, String category, DateTime? date) async {
   final token = await storage.read(key: 'access_token');
   final url = Uri.parse('http://10.0.2.2:8000/api/expense/$id/');
 
@@ -94,14 +87,8 @@ Future<Map<String, dynamic>> editExpense(
           'amount': amount,
           'description': description,
           'category': category,
-          'date_spended': dateSpended?.toIso8601String()
+          'date_spended': date?.toIso8601String()
         }));
-    print(jsonEncode({
-      'amount': amount,
-      'description': description,
-      'category': category,
-      'date_spended': dateSpended?.toIso8601String() ?? ''
-    }));
 
     if (response.statusCode == 200) {
       return {'success': true, 'message': 'Successfully edited expense'};

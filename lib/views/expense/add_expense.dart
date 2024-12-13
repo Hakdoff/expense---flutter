@@ -79,9 +79,9 @@ class _AddExpenseState extends State<AddExpense> {
 
       if (result['success']) {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Expense added successfully')));
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (context) => ExpensePage()));
+            const SnackBar(content: Text('Expense added successfully')));
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) => const ExpensePage()));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             content: Text(result['message'] ?? 'Failed to add Expense')));
@@ -96,7 +96,7 @@ class _AddExpenseState extends State<AddExpense> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: _isLoading
                 ? const CircularProgressIndicator()
                 : Column(

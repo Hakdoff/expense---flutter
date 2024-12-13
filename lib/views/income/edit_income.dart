@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 class EditIncomePage extends StatefulWidget {
   final IncomeModel income;
 
-  const EditIncomePage({Key? key, required this.income}) : super(key: key);
+  const EditIncomePage({super.key, required this.income});
 
   @override
   State<EditIncomePage> createState() => _EditIncomePageState();
@@ -29,8 +29,8 @@ class _EditIncomePageState extends State<EditIncomePage> {
         TextEditingController(text: widget.income.description);
     _categoryController = TextEditingController(text: widget.income.category);
     _dateController = TextEditingController(
-        text: widget.income.dateReceived != null
-            ? DateFormat('yyyy-MM-dd').format(widget.income.dateReceived!)
+        text: widget.income.date != null
+            ? DateFormat('yyyy-MM-dd').format(widget.income.date!)
             : '');
   }
 
@@ -46,7 +46,7 @@ class _EditIncomePageState extends State<EditIncomePage> {
   Future<void> _editIncome() async {
     try {
       if (_formKey.currentState!.validate()) {
-        final dateReceived = _dateController.text.isNotEmpty
+        final date = _dateController.text.isNotEmpty
             ? DateTime.tryParse(_dateController.text)
             : null;
         final result = await editIncome(
@@ -55,10 +55,9 @@ class _EditIncomePageState extends State<EditIncomePage> {
             int.parse(_amountController.text),
             _descriptionController.text,
             _categoryController.text,
-            dateReceived);
-        print('EDit $result');
+            date);
 
-        if (result != null && result['success']) {
+        if (result['success']) {
           ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Income updated successfully")));
           Navigator.of(context).pushReplacement(
@@ -70,8 +69,6 @@ class _EditIncomePageState extends State<EditIncomePage> {
         }
       }
     } catch (e) {
-      // Catch any exception during the process
-      print("Error during income update: $e");
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('An error occurred while updating income')));
     }
@@ -83,11 +80,11 @@ class _EditIncomePageState extends State<EditIncomePage> {
         appBar: AppBar(
           title: const Text('Edit Income'),
           leading: IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => IncomePage()),
+                MaterialPageRoute(builder: (context) => const IncomePage()),
               );
             },
           ),

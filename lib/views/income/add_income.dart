@@ -77,7 +77,7 @@ class _AddIncomeState extends State<AddIncome> {
             const SnackBar(content: Text('Income added successfully')));
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => IncomePage()),
+          MaterialPageRoute(builder: (context) => const IncomePage()),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -99,7 +99,7 @@ class _AddIncomeState extends State<AddIncome> {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => IncomePage()),
+              MaterialPageRoute(builder: (context) => const IncomePage()),
             );
           },
         ),

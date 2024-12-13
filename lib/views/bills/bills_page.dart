@@ -1,43 +1,52 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_expense_tracker/model/income_model.dart';
+import 'package:flutter_expense_tracker/model/bills_model.dart';
+import 'package:flutter_expense_tracker/services/bills_services.dart';
 import 'package:flutter_expense_tracker/services/income_service.dart';
+import 'package:flutter_expense_tracker/views/bills/add_bills.dart';
 import 'package:flutter_expense_tracker/views/home_page.dart';
 import 'package:flutter_expense_tracker/views/income/add_income.dart';
 import 'package:flutter_expense_tracker/views/income/edit_income.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:intl/intl.dart';
 
-class IncomePage extends StatefulWidget {
-  const IncomePage({super.key});
+class BillsPage extends StatefulWidget {
+  const BillsPage({super.key});
 
   @override
-  _IncomePageState createState() => _IncomePageState();
+  _BillsPageState createState() => _BillsPageState();
 }
 
-class _IncomePageState extends State<IncomePage> {
+class _BillsPageState extends State<BillsPage> {
   final storage = const FlutterSecureStorage();
-  List<dynamic> _incomes = [];
+  List<dynamic> _bills = [];
   String? _errorMessage;
   bool _isLoading = false;
 
   int? selectedYear;
   int? selectedMonth;
+  double _totalBills = 0.0;
 
-  Future<void> _fetchAllIncomes() async {
+  Future<void> _fetchAllBills() async {
     setState(() {
       _isLoading = true;
     });
 
-    final result = await fetchAllIncomes(context);
+    final result = await fetchBills(context);
 
     setState(() {
       _isLoading = false;
       if (result['success'] == true) {
-        final incomesData = result['data'] as List<dynamic>;
+        final billsData = result['data'] as List<dynamic>;
 
-        _incomes = incomesData
-            .map((incomeJson) => IncomeModel.fromJson(incomeJson))
+        _bills = billsData
+            .map((billsJson) => BillsModel.fromJson(billsJson))
             .toList();
+        _totalBills = _bills.fold(
+          0.0,
+          (sum, bills) => sum + (bills.amount ?? 0.0),
+        );
+
+        print(_totalBills);
       } else {
         _errorMessage = result['message'];
       }
@@ -50,7 +59,7 @@ class _IncomePageState extends State<IncomePage> {
     DateTime now = DateTime.now();
     selectedYear = now.year;
     selectedMonth = now.month;
-    _fetchAllIncomes();
+    _fetchAllBills();
   }
 
   Widget _getCategoryIcon(String category) {
@@ -92,40 +101,6 @@ class _IncomePageState extends State<IncomePage> {
 
   @override
   Widget build(BuildContext context) {
-    double calculateTotalIncome({int? year, int? month}) {
-      return _incomes.where((income) {
-        DateTime? date = income.date;
-        if (date == null) return false;
-        bool matchesYear = year == null || date.year == year;
-        bool matchesMonth = month == null || date.month == month;
-        return matchesYear && matchesMonth;
-      }).fold(0.0, (sum, income) => sum + (income.amount ?? 0));
-    }
-
-    double calculateIncomeYear({
-      int? year,
-    }) {
-      return _incomes.where((income) {
-        DateTime? date = income.date;
-        if (date == null) return false;
-        bool matchesYear = year == null || date.year == year;
-        return matchesYear;
-      }).fold(0.0, (sum, income) => sum + (income.amount ?? 0));
-    }
-
-    double calculateIncomeMonth({int? month}) {
-      return _incomes.where((income) {
-        DateTime? date = income.date;
-        if (date == null) return false;
-        bool matchesMonth = month == null || date.month == month;
-        return matchesMonth;
-      }).fold(0.0, (sum, income) => sum + (income.amount ?? 0));
-    }
-
-    double totalIncome = calculateTotalIncome();
-
-    double monthIncome = calculateIncomeMonth(month: selectedMonth);
-    double yearIncome = calculateIncomeYear(year: selectedYear);
     return Scaffold(
       appBar: AppBar(
         title: const Text("Expense Tracker"),
@@ -159,7 +134,7 @@ class _IncomePageState extends State<IncomePage> {
                               children: [
                                 const Expanded(
                                   child: Text(
-                                    'Total Income:',
+                                    'Total Monthly Bills:',
                                     style: TextStyle(fontSize: 15),
                                   ),
                                 ),
@@ -168,7 +143,7 @@ class _IncomePageState extends State<IncomePage> {
                                 ),
                                 Expanded(
                                   child: Text(
-                                    " \$ ${totalIncome.toStringAsFixed(2)}",
+                                    " \$ ${_totalBills.toStringAsFixed(2)}",
                                     style: const TextStyle(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold),
@@ -177,81 +152,6 @@ class _IncomePageState extends State<IncomePage> {
                               ],
                             ),
                           ),
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  DropdownButton<int>(
-                                      hint: const Text("Month",
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 20)),
-                                      value: selectedMonth,
-                                      icon: const Icon(
-                                        Icons.date_range,
-                                        color: Colors.black,
-                                        size: 20,
-                                      ),
-                                      items: List.generate(12, (index) {
-                                        return DropdownMenuItem<int>(
-                                          value: index + 1,
-                                          child: Text(DateFormat.MMMM()
-                                              .format(DateTime(0, index + 1))),
-                                        );
-                                      }),
-                                      onChanged: (month) {
-                                        setState(() {
-                                          selectedMonth = month;
-                                        });
-                                      }),
-                                  Text(
-                                    '\$ ${monthIncome.toStringAsFixed(0)}',
-                                    style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  DropdownButton<int>(
-                                      hint: const Text("Year ",
-                                          style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 20)),
-                                      value: selectedYear,
-                                      icon: const Icon(
-                                        Icons.calendar_today,
-                                        color: Colors.black,
-                                        size: 20,
-                                      ),
-                                      items: List.generate(
-                                        10,
-                                        (index) => 2020 + index,
-                                      ).map((year) {
-                                        return DropdownMenuItem<int>(
-                                            value: year,
-                                            child: Text(year.toString()));
-                                      }).toList(),
-                                      onChanged: (year) {
-                                        setState(() {
-                                          selectedYear = year;
-                                        });
-                                      }),
-                                  Text(
-                                    yearIncome.toStringAsFixed(2),
-                                    style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
                         ),
                       ],
                     ),
@@ -270,7 +170,7 @@ class _IncomePageState extends State<IncomePage> {
                 child: Padding(
                   padding: EdgeInsets.only(left: 8, right: 8),
                   child: Text(
-                    'Transactions',
+                    'Transactions bills',
                     textAlign: TextAlign.start,
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
@@ -282,28 +182,22 @@ class _IncomePageState extends State<IncomePage> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 20),
                     child: ListView.builder(
-                      itemCount: _incomes.length,
+                      itemCount: _bills.length,
                       itemBuilder: (context, index) {
-                        final income = _incomes[index];
+                        final bills = _bills[index];
                         return Card(
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12)),
                           child: ListTile(
-                            leading: _getCategoryIcon(income.category ?? ''),
-                            title: Text('${income.category ?? 'N/A'}'),
-                            subtitle: Text(
-                              income.date != null
-                                  ? DateFormat('yyyy-MM-dd')
-                                      .format(income.date!)
-                                  : 'N/A',
-                            ),
+                            leading: _getCategoryIcon(bills.category ?? ''),
+                            title: Text('${bills.category ?? 'N/A'}'),
                             trailing: SizedBox(
                               width: 150,
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   Text(
-                                    '+ \$ ${income.amount ?? 'N/A'}',
+                                    '+ \$ ${bills.amount ?? 'N/A'}',
                                     style: const TextStyle(
                                         fontSize: 20, color: Colors.green),
                                   ),
@@ -314,15 +208,15 @@ class _IncomePageState extends State<IncomePage> {
                                             MaterialPageRoute(
                                                 builder: (context) =>
                                                     EditIncomePage(
-                                                      income: income,
+                                                      income: bills,
                                                     )));
                                       } else if (value == 'Delete') {
                                         final result = await deleteIncome(
-                                            context, income.id);
+                                            context, bills.id);
 
                                         if (result['success']) {
                                           setState(() {
-                                            _incomes.removeAt(index);
+                                            bills.removeAt(index);
                                           });
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(const SnackBar(
@@ -371,7 +265,7 @@ class _IncomePageState extends State<IncomePage> {
                         onPressed: () {
                           Navigator.of(context).pushReplacement(
                               MaterialPageRoute(
-                                  builder: (context) => const AddIncome()));
+                                  builder: (context) => const AddBills()));
                         },
                         child: const Icon(Icons.add),
                       ),
